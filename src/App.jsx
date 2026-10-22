@@ -38,24 +38,9 @@ export default function App() {
   // Telematics real-time engine snapshot
   const [snapshot, setSnapshot] = useState(() => telematicsEngine.getSnapshot());
 
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    try {
-      const stored = localStorage.getItem("hauloop_auth");
-      return stored ? JSON.parse(stored).isAuthenticated : true; // Default logged in for immediate showcase
-    } catch {
-      return true;
-    }
-  });
-
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("hauloop_auth");
-      return stored ? JSON.parse(stored).user : INITIAL_USER;
-    } catch {
-      return INITIAL_USER;
-    }
-  });
+  // Authentication State: Default to false so application always opens on Login page
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(INITIAL_USER);
 
   // Subscribe to real-time telematics engine updates
   useEffect(() => {
