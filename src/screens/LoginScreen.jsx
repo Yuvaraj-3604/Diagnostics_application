@@ -100,29 +100,6 @@ export default function LoginScreen({ onLoginSuccess }) {
     }, 550);
   };
 
-  // 1-Click Quick Demo Login for instant showcase
-  const handleQuickDemo = () => {
-    setEmail("yuvaraj@hauloop.com");
-    setPassword("hauloop2026");
-    setCaptchaInput(captchaCode);
-    setError(null);
-
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      const demoUser = {
-        username: "yuvaraj",
-        email: "yuvaraj@hauloop.com",
-        fullName: "Yuvaraj Perumal",
-        role: "Fleet Administrator",
-        operatorId: "ADM-3604",
-        phone: "+91 98765 43210",
-        loginTime: new Date().toLocaleTimeString()
-      };
-      recordUserLogin(demoUser.email);
-      onLoginSuccess(demoUser, true);
-    }, 400);
-  };
 
   // Colors for stylized captcha characters
   const charColors = ["#002b49", "#d32f2f", "#1e3a5f", "#c62828", "#0f2b48"];
@@ -383,17 +360,6 @@ export default function LoginScreen({ onLoginSuccess }) {
               </button>
             </div>
 
-            {/* Convenient 1-Click Demo Login Chip */}
-            <div className="auth-quick-demo-box">
-              <button
-                type="button"
-                className="auth-quick-demo-chip"
-                onClick={handleQuickDemo}
-                title="Auto-fill credentials and sign in as Yuvaraj Perumal"
-              >
-                ⚡ 1-Click Demo: Yuvaraj Perumal (Fleet Admin)
-              </button>
-            </div>
           </div>
         </div>
       </div>
