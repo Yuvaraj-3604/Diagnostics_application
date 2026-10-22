@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Download, FileText, CheckCircle2, AlertTriangle, ShieldCheck,
-  Truck, Search, ArrowDownToLine, RefreshCw, Filter, Clock
+  Truck, Search, ArrowDownToLine, RefreshCw, Filter, Clock, Eye, X
 } from "lucide-react";
 import truckThumb from "../assets/hauloop-truck.png";
 import { generateVehicleHealthReportPdf } from "../lib/pdfReportGenerator.js";
@@ -195,6 +195,7 @@ export default function ReportsScreen({ vehicles = [] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [downloadSuccessMsg, setDownloadSuccessMsg] = useState(null);
+  const [viewingReportVehicle, setViewingReportVehicle] = useState(null);
 
   // Download PDF handler for an individual vehicle
   const handleDownloadVehiclePdf = (vehicle) => {
@@ -429,14 +430,26 @@ export default function ReportsScreen({ vehicles = [] }) {
                         </div>
                       </td>
                       <td className="text-right">
-                        <button
-                          className="hl-btn-download-pdf"
-                          onClick={() => handleDownloadVehiclePdf(v)}
-                          title={`Download official PDF report for ${v.vehicleNo}`}
-                        >
-                          <Download size={14} />
-                          <span>Download PDF</span>
-                        </button>
+                        <div className="report-row-actions">
+                          <button
+                            type="button"
+                            className="hl-btn-view-report"
+                            onClick={() => setViewingReportVehicle(v)}
+                            title={`View official report for ${v.vehicleNo}`}
+                          >
+                            <Eye size={14} />
+                            <span>View</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="hl-btn-download-pdf"
+                            onClick={() => handleDownloadVehiclePdf(v)}
+                            title={`Download official PDF report for ${v.vehicleNo}`}
+                          >
+                            <Download size={14} />
+                            <span>Download PDF</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -458,10 +471,181 @@ export default function ReportsScreen({ vehicles = [] }) {
             Each downloaded PDF report contains complete SAE J1939 telematics diagnostic telemetry, including Report ID, Overall Status, Issue Explanation, Diagnostic Parameters (Supported vs. Unavailable), Technical Appendix with active SPN/FMI fault codes, CAN Broadcast IDs, Assessment, and Customer Summary for the <strong>2026</strong> reporting cycle.
           </p>
           <p className="callout-desc" style={{ marginTop: "8px", fontWeight: "600", color: "#0f172a" }}>
-            📱 <strong>On Mobile Phone / APK:</strong> Look in your phone's <strong>"Files"</strong> (or <strong>"My Files"</strong>) app → <strong>Downloads</strong> folder. Tapping "Download PDF" also opens your phone's PDF reader (Drive PDF Viewer) or save dialog.
+            📱 <strong>On Mobile Phone / APK:</strong> Tap the <strong>View</strong> (Eye) button to inspect the full report directly on your screen, or tap <strong>Download PDF</strong> to save to your phone's <strong>Downloads</strong> folder.
           </p>
         </div>
       </div>
+
+      {/* In-App Interactive Vehicle Health Report Modal */}
+      {viewingReportVehicle && (() => {
+        const rep = getVehicleHealthReportData(viewingReportVehicle);
+        return (
+          <div className="auth-modal-overlay" onClick={() => setViewingReportVehicle(null)}>
+            <div className="report-viewer-modal-card" onClick={(e) => e.stopPropagation()}>
+              {/* Modal Top Header */}
+              <div className="report-modal-header">
+                <div className="report-modal-header-titles">
+                  <div className="report-brand-badge">
+                    <span className="brand-dot" />
+                    <span>HAULOOP VEHICLE CARE</span>
+                  </div>
+                  <h3 className="report-modal-main-title">Vehicle Health Diagnostic Report</h3>
+                  <div className="report-id-subline">
+                    <span>Report ID: <strong>{rep.reportId}</strong></span>
+                    <span className="dot-sep">•</span>
+                    <span>Vehicle: <strong>{rep.vehicleNo}</strong> ({rep.model})</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="auth-modal-close-btn"
+                  onClick={() => setViewingReportVehicle(null)}
+                  aria-label="Close report viewer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Modal Report Scrollable Body */}
+              <div className="report-modal-scroll-body">
+                {/* 1. Header Metadata Box */}
+                <div className="report-view-meta-box">
+                  <div className="meta-item">
+                    <span className="meta-lbl">Generated On:</span>
+                    <span className="meta-val">{rep.generatedOn}</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-lbl">Report Period:</span>
+                    <span className="meta-val">{rep.reportPeriod}</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-lbl">Overall Vehicle Status:</span>
+                    <span className={`status-pill ${getStatusBadgeClass(rep.overallStatus)}`}>
+                      {rep.overallStatus}
+                    </span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-lbl">Vehicle Health:</span>
+                    <span className={`status-pill ${getStatusBadgeClass(rep.assessment)}`}>
+                      {rep.assessment}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Customer Summary */}
+                <div className="report-view-section">
+                  <h4 className="report-view-sec-title">Summary</h4>
+                  <div className="report-view-text-card">
+                    {rep.summary}
+                  </div>
+                </div>
+
+                {/* 3. Issue Explanation */}
+                <div className="report-view-section">
+                  <h4 className="report-view-sec-title">Issue Explanation</h4>
+                  <div className="report-view-text-card">
+                    {rep.issueExplanation}
+                  </div>
+                </div>
+
+                {/* 4. Important Notice */}
+                <div className="report-view-advisory-box">
+                  <AlertTriangle size={18} className="text-amber flex-shrink-0" />
+                  <div>
+                    <strong>Important:</strong> Critical warnings should be assessed promptly. Follow the vehicle manufacturer's instructions and arrange a physical inspection where necessary. Only parameters supported by the connected vehicle and diagnostic device are displayed.
+                  </div>
+                </div>
+
+                {/* 5. Diagnostic Parameters Table */}
+                <div className="report-view-section">
+                  <h4 className="report-view-sec-title">Monitored Telematics Parameters</h4>
+                  <div className="report-params-table-wrap">
+                    <table className="hl-table report-modal-table">
+                      <thead>
+                        <tr>
+                          <th>Parameter</th>
+                          <th>SPN / Register</th>
+                          <th>Measured Value</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rep.parameters?.map((p, idx) => (
+                          <tr key={idx}>
+                            <td><strong>{p.parameter}</strong></td>
+                            <td className="text-muted">{p.spn}</td>
+                            <td><span className="font-mono font-bold">{p.value}</span></td>
+                            <td>
+                              <span className={`status-pill ${p.status === "Unavailable" ? "badge-unavailable" : (p.status === "Critical" ? "badge-offline" : (p.status === "Needs Attention" ? "badge-attention" : "badge-healthy"))}`}>
+                                {p.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 6. Technical Appendix (Fault Codes & CAN Broadcasts) */}
+                <div className="report-view-section">
+                  <h4 className="report-view-sec-title">Technical Appendix: Fault Codes & CAN Registers</h4>
+                  <div className="report-appendix-grid">
+                    <div className="appendix-subcard">
+                      <div className="subcard-title">Diagnostic Trouble Codes (DTC)</div>
+                      {rep.faultCodes?.length > 0 ? (
+                        <div className="fault-codes-list">
+                          {rep.faultCodes.map((fc, idx) => (
+                            <div key={idx} className="fault-code-pill-item">
+                              <span className="fc-code">{fc.code}</span>
+                              <span className="fc-desc">{fc.description}</span>
+                              <span className={`status-pill ${fc.status === "Critical" ? "badge-offline" : "badge-attention"}`}>{fc.status}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted">No active diagnostic fault codes detected. System healthy.</div>
+                      )}
+                    </div>
+
+                    <div className="appendix-subcard">
+                      <div className="subcard-title">Monitored CAN Broadcast PGNs</div>
+                      <div className="can-pgn-list">
+                        {rep.canBroadcasts?.map((cb, idx) => (
+                          <div key={idx} className="can-pgn-row">
+                            <span className="can-id font-mono">{cb.id}</span>
+                            <span className="can-desc">{cb.description}</span>
+                            <span className="can-rate text-xs text-muted">{cb.rate}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Action Footer */}
+              <div className="report-modal-footer">
+                <button
+                  type="button"
+                  className="hl-btn-download-pdf"
+                  onClick={() => handleDownloadVehiclePdf(viewingReportVehicle)}
+                >
+                  <Download size={15} />
+                  <span>Download PDF Report</span>
+                </button>
+                <button
+                  type="button"
+                  className="hl-btn-secondary"
+                  onClick={() => setViewingReportVehicle(null)}
+                >
+                  Close Viewer
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

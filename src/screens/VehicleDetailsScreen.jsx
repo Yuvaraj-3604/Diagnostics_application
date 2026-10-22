@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   ArrowLeft, Edit3, FileText, Activity, Battery, Thermometer,
-  Fuel, Gauge, MapPin, ArrowRight, ExternalLink
+  Fuel, Gauge, MapPin, ArrowRight, ExternalLink, Eye
 } from "lucide-react";
 import truckHeroImg from "../assets/hauloop-truck.png";
 import LiveLocationScreen from "./LiveLocationScreen.jsx";
@@ -47,7 +47,10 @@ export default function VehicleDetailsScreen({
           <button
             className="hl-btn-primary"
             onClick={() => setPage("reports")}
+            title="Open Vehicle Health Report"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
+            <Eye size={15} />
             <span>View Report</span>
           </button>
         </div>
