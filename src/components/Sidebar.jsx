@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   LayoutDashboard, Truck, Activity, FileText, Bell, Settings,
-  X, Radio, Binary, Layers, Cpu, ShieldCheck, ChevronDown, ChevronRight
+  X, Radio, Binary, Layers, ShieldCheck, ChevronDown, ChevronRight
 } from "lucide-react";
 import hauloopLogo from "../assets/hauloop-logo.png";
 
@@ -26,8 +26,7 @@ export default function Sidebar({
   const ADVANCED_CAN_NAV = [
     { id: "can-monitor", label: "CAN Bus Monitor", icon: Radio },
     { id: "can-analyzer", label: "CAN Protocol Analyzer", icon: Binary },
-    { id: "avl-mapping", label: "AVL Element Mapping", icon: Layers },
-    { id: "devices", label: "FMC650 Hardware Fleet", icon: Cpu }
+    { id: "avl-mapping", label: "AVL Element Mapping", icon: Layers }
   ];
 
   const handleNavClick = (id) => {
