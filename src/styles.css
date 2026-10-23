@@ -1744,6 +1744,18 @@ select {
 .quick-select-pills {
   display: flex;
   gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-wrap: nowrap;
+  padding-bottom: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.quick-select-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .pill-btn {
@@ -1756,6 +1768,8 @@ select {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .pill-btn:hover {
@@ -2782,6 +2796,26 @@ select {
   .canoe-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .id-analyzer-bar {
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  .id-analyzer-bar .input-group,
+  .id-analyzer-bar .input-group.flex-2 {
+    width: 100% !important;
+    flex: none !important;
+    min-width: 0 !important;
+  }
+
+  .id-analyzer-bar .input-group input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    font-size: 13px !important;
   }
 
   .j1939-bitfield-grid {
