@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Search, Plus, ChevronRight, Truck, CheckCircle2, AlertTriangle,
-  WifiOff, ArrowRight, X, ChevronDown
+  WifiOff, ArrowRight, X, Edit3, Check
 } from "lucide-react";
 import truckThumbnail from "../assets/hauloop-truck.png";
 
@@ -9,17 +9,86 @@ export default function VehiclesScreen({
   vehicles,
   onSelectVehicle,
   onAddVehicle,
+  onUpdateVehicle,
   searchQuery,
-  setSearchQuery
+  setSearchQuery,
+  statusFilter = "all",
+  setStatusFilter
 }) {
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [internalStatusFilter, setInternalStatusFilter] = useState("all");
+  const currentFilter = setStatusFilter ? statusFilter : internalStatusFilter;
+  const updateFilter = (val) => {
+    if (setStatusFilter) setStatusFilter(val);
+    else setInternalStatusFilter(val);
+  };
+
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState(null);
 
   // New vehicle modal form state
   const [newVehNo, setNewVehNo] = useState("");
   const [newMakeModel, setNewMakeModel] = useState("Ashok Leyland 3520");
   const [newDriver, setNewDriver] = useState("");
   const [newYear, setNewYear] = useState("2024");
+
+  // Edit vehicle modal form state
+  const [editForm, setEditForm] = useState({
+    vehicleNo: "",
+    makeModel: "",
+    driver: "",
+    driverPhone: "",
+    status: "Healthy",
+    engineStatus: "Normal",
+    batteryStatus: "Good",
+    year: 2024,
+    fuelLevel: 75,
+    locationName: ""
+  });
+
+  const handleOpenEditModal = (vehicle) => {
+    setEditingVehicle(vehicle);
+    setEditForm({
+      vehicleNo: vehicle.vehicleNo || "",
+      makeModel: vehicle.makeModel || "",
+      driver: vehicle.driver || "",
+      driverPhone: vehicle.driverPhone || "+91 98421 11234",
+      status: vehicle.status || "Healthy",
+      engineStatus: vehicle.engineStatus || "Normal",
+      batteryStatus: vehicle.batteryStatus || "Good",
+      year: vehicle.year || 2024,
+      fuelLevel: vehicle.fuelLevel !== undefined ? vehicle.fuelLevel : 75,
+      locationName: vehicle.locationName || "Coimbatore, Tamil Nadu"
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editingVehicle || !editForm.vehicleNo.trim()) return;
+
+    const updated = {
+      ...editingVehicle,
+      vehicleNo: editForm.vehicleNo.trim().toUpperCase(),
+      makeModel: editForm.makeModel.trim() || editingVehicle.makeModel,
+      make: editForm.makeModel.split(" ")[0] || editingVehicle.make,
+      model: editForm.makeModel.split(" ").slice(1).join(" ") || editingVehicle.model,
+      driver: editForm.driver.trim() || editingVehicle.driver,
+      driverPhone: editForm.driverPhone.trim() || editingVehicle.driverPhone,
+      status: editForm.status,
+      engineStatus: editForm.engineStatus,
+      batteryStatus: editForm.batteryStatus,
+      year: parseInt(editForm.year) || editingVehicle.year,
+      fuelLevel: Number(editForm.fuelLevel),
+      locationName: editForm.locationName.trim() || editingVehicle.locationName,
+      lastUpdated: "Just now"
+    };
+
+    if (onUpdateVehicle) {
+      onUpdateVehicle(updated);
+    }
+    setShowEditModal(false);
+  };
 
   // Filter vehicles
   const filteredVehicles = vehicles.filter((v) => {
@@ -28,8 +97,8 @@ export default function VehiclesScreen({
       v.makeModel.toLowerCase().includes((searchQuery || "").toLowerCase()) ||
       v.driver.toLowerCase().includes((searchQuery || "").toLowerCase());
 
-    if (statusFilter === "all") return matchesSearch;
-    return matchesSearch && v.status.toLowerCase().replace(" ", "").includes(statusFilter.toLowerCase().replace(" ", ""));
+    if (currentFilter === "all") return matchesSearch;
+    return matchesSearch && v.status.toLowerCase().replace(" ", "").includes(currentFilter.toLowerCase().replace(" ", ""));
   });
 
   const handleCreateVehicle = (e) => {
@@ -128,8 +197,8 @@ export default function VehiclesScreen({
 
         <div className="vehicles-status-select-wrap">
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            value={currentFilter}
+            onChange={(e) => updateFilter(e.target.value)}
             className="vehicles-status-select"
           >
             <option value="all">All Status</option>
@@ -137,7 +206,6 @@ export default function VehiclesScreen({
             <option value="attention">Need Attention</option>
             <option value="offline">Offline</option>
           </select>
-          <ChevronDown size={14} className="select-arrow-icon" />
         </div>
       </div>
 
@@ -152,13 +220,14 @@ export default function VehiclesScreen({
                 <th>Driver</th>
                 <th>Status</th>
                 <th>Last Updated</th>
+                <th style={{ width: "90px" }}>Action</th>
                 <th className="th-chevron"></th>
               </tr>
             </thead>
             <tbody>
               {filteredVehicles.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="table-empty-cell">
+                  <td colSpan={7} className="table-empty-cell">
                     No vehicles found matching "{searchQuery}".
                   </td>
                 </tr>
@@ -208,6 +277,22 @@ export default function VehiclesScreen({
                       {/* Last Updated */}
                       <td className="td-updated">
                         <span className="updated-text">{vehicle.lastUpdated}</span>
+                      </td>
+
+                      {/* Edit Button */}
+                      <td className="td-actions" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          className="hl-btn-row-edit"
+                          title={`Edit ${vehicle.vehicleNo}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenEditModal(vehicle);
+                          }}
+                        >
+                          <Edit3 size={14} />
+                          <span>Edit</span>
+                        </button>
                       </td>
 
                       {/* Chevron Action Arrow matching Screen 3 */}
@@ -295,6 +380,198 @@ export default function VehiclesScreen({
                 </button>
                 <button type="submit" className="hl-btn-primary">
                   Register Vehicle
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Vehicle Modal */}
+      {showEditModal && editingVehicle && (
+        <div className="hl-modal-backdrop" onClick={() => setShowEditModal(false)}>
+          <div className="hl-modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="hl-modal-header">
+              <div className="modal-header-icon-title">
+                <Edit3 size={18} className="text-primary" />
+                <h3 className="modal-title">Edit Vehicle · {editingVehicle.vehicleNo}</h3>
+              </div>
+              <button
+                type="button"
+                className="modal-close-btn"
+                onClick={() => setShowEditModal(false)}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="modal-form">
+              <div className="form-group">
+                <label>Vehicle Registration Number *</label>
+                <input
+                  type="text"
+                  value={editForm.vehicleNo}
+                  onChange={(e) => setEditForm({ ...editForm, vehicleNo: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Make & Model *</label>
+                <input
+                  type="text"
+                  value={editForm.makeModel}
+                  onChange={(e) => setEditForm({ ...editForm, makeModel: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group">
+                  <label>Assigned Driver</label>
+                  <input
+                    type="text"
+                    value={editForm.driver}
+                    onChange={(e) => setEditForm({ ...editForm, driver: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Driver Phone Number</label>
+                  <input
+                    type="tel"
+                    value={editForm.driverPhone}
+                    onChange={(e) => setEditForm({ ...editForm, driverPhone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group">
+                  <label>Operational Status</label>
+                  <select
+                    value={editForm.status}
+                    onChange={(e) => {
+                      const newStatus = e.target.value;
+                      setEditForm((prev) => {
+                        let eng = prev.engineStatus;
+                        let batt = prev.batteryStatus;
+                        if (newStatus === "Healthy") {
+                          eng = "Normal";
+                          batt = "Good";
+                        } else if (newStatus === "Offline") {
+                          eng = "Offline";
+                          batt = "Offline";
+                        } else if (newStatus === "Need Attention" && eng === "Normal" && batt === "Good") {
+                          eng = "Need Attention";
+                        }
+                        return { ...prev, status: newStatus, engineStatus: eng, batteryStatus: batt };
+                      });
+                    }}
+                    style={{
+                      height: "40px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--hl-card-border)",
+                      padding: "0 12px",
+                      fontSize: "13.5px"
+                    }}
+                  >
+                    <option value="Healthy">Healthy</option>
+                    <option value="Need Attention">Need Attention</option>
+                    <option value="Offline">Offline</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Fuel Level (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editForm.fuelLevel}
+                    onChange={(e) => setEditForm({ ...editForm, fuelLevel: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Engine Status & Battery Status (Request 2) */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div className="form-group">
+                  <label>Engine Status</label>
+                  <select
+                    value={editForm.engineStatus}
+                    onChange={(e) => {
+                      const newEng = e.target.value;
+                      setEditForm((prev) => {
+                        let st = prev.status;
+                        if (newEng !== "Normal" && st === "Healthy") st = "Need Attention";
+                        return { ...prev, engineStatus: newEng, status: st };
+                      });
+                    }}
+                    style={{
+                      height: "40px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--hl-card-border)",
+                      padding: "0 12px",
+                      fontSize: "13.5px"
+                    }}
+                  >
+                    <option value="Normal">Normal</option>
+                    <option value="Check Engine">Check Engine</option>
+                    <option value="Need Attention">Need Attention</option>
+                    <option value="Offline">Offline</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Battery Status</label>
+                  <select
+                    value={editForm.batteryStatus}
+                    onChange={(e) => {
+                      const newBatt = e.target.value;
+                      setEditForm((prev) => {
+                        let st = prev.status;
+                        if (newBatt !== "Good" && st === "Healthy") st = "Need Attention";
+                        return { ...prev, batteryStatus: newBatt, status: st };
+                      });
+                    }}
+                    style={{
+                      height: "40px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--hl-card-border)",
+                      padding: "0 12px",
+                      fontSize: "13.5px"
+                    }}
+                  >
+                    <option value="Good">Good</option>
+                    <option value="Need Attention">Need Attention</option>
+                    <option value="Low Voltage">Low Voltage</option>
+                    <option value="Offline">Offline</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Depot / Current Location</label>
+                <input
+                  type="text"
+                  value={editForm.locationName}
+                  onChange={(e) => setEditForm({ ...editForm, locationName: e.target.value })}
+                />
+              </div>
+
+              <div className="modal-actions-row">
+                <button
+                  type="button"
+                  className="hl-btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="hl-btn-primary">
+                  <Check size={16} />
+                  <span>Save Changes</span>
                 </button>
               </div>
             </form>

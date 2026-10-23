@@ -503,9 +503,35 @@ body {
   justify-content: space-between;
 }
 
+.alerts-dropdown-header {
+  padding: 10px 16px;
+}
+
+.dropdown-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dropdown-title {
   font-size: 13px;
   font-weight: 700;
+}
+
+.hl-clear-all-btn {
+  background: none;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--hl-primary);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: var(--hl-radius-sm);
+  transition: all 0.15s;
+}
+
+.hl-clear-all-btn:hover {
+  background: var(--hl-primary-light);
 }
 
 .badge-count {
@@ -523,15 +549,40 @@ body {
 }
 
 .alert-preview-item {
-  padding: 12px 16px;
+  position: relative;
+  padding: 12px 34px 12px 16px;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
   gap: 10px;
+  align-items: flex-start;
   transition: background 0.15s;
 }
 
 .alert-preview-item:hover {
   background: #f8fafc;
+}
+
+.alert-item-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--hl-text-muted);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: all 0.15s;
+}
+
+.alert-item-close-btn:hover {
+  opacity: 1;
+  color: var(--hl-primary);
+  background: var(--hl-primary-light);
 }
 
 .alert-dot-indicator {
@@ -1608,6 +1659,120 @@ body {
   outline: none;
   font-size: 13.5px;
   width: 100%;
+}
+
+.vehicles-status-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.vehicles-status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  border: 1px solid var(--hl-card-border);
+  border-radius: var(--hl-radius-full);
+  padding: 8px 38px 8px 16px;
+  font-size: 13.5px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--hl-text-primary);
+  box-shadow: var(--hl-shadow-sm);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vehicles-status-select:focus {
+  border-color: var(--hl-primary);
+  box-shadow: 0 0 0 3px rgba(229, 37, 42, 0.12);
+}
+
+.hl-btn-row-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--hl-radius-full);
+  border: 1px solid var(--hl-card-border);
+  background: #ffffff;
+  color: var(--hl-text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hl-btn-row-edit:hover {
+  background: var(--hl-primary-light);
+  color: var(--hl-primary);
+  border-color: #fca5a5;
+}
+
+.hl-btn-outline-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #ffffff;
+  border: 1px solid var(--hl-card-border);
+  border-radius: var(--hl-radius-md);
+  color: var(--hl-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hl-btn-outline-clear:hover {
+  background: #fee2e2;
+  color: var(--hl-primary);
+  border-color: #fca5a5;
+}
+
+.alert-row-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--hl-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.alert-row-dismiss-btn:hover {
+  color: var(--hl-primary);
+  background: #fee2e2;
+}
+
+.hl-toast-banner-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: var(--hl-radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+.modal-header-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .vehicles-filter-tabs {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   CheckCircle2, AlertTriangle, XCircle, ArrowRight, Activity, Battery,
-  Disc, Zap, ShieldCheck, Thermometer, ChevronRight
+  Disc, Zap, ShieldCheck, Thermometer, ChevronRight, WifiOff
 } from "lucide-react";
 
 export default function HealthReportsScreen({
@@ -14,45 +14,134 @@ export default function HealthReportsScreen({
   const vehicle = selectedVehicle || {
     vehicleNo: "TN 38 AB 4821",
     makeModel: "Ashok Leyland 3520",
-    healthScore: 92,
-    subsystems: {
-      engine: 95,
-      battery: 92,
-      brakes: 94,
-      transmission: 90,
-      emissions: 96
-    }
+    status: "Healthy",
+    engineStatus: "Normal",
+    batteryStatus: "Good"
   };
 
-  const healthScore = vehicle.healthScore || 92;
+  const isNeedAttention = vehicle.status === "Need Attention" || vehicle.status === "Attention";
+  const isOffline = vehicle.status === "Offline";
+  const isHealthy = !isNeedAttention && !isOffline;
 
-  // Recent faults list matching Panel 6
-  const recentFaults = [
-    {
-      id: "f1",
-      title: "Overheat warning (resolved)",
-      vehicleNo: "TN 38 AB 4821",
-      date: "12 Jul 2026 - 10:32 AM",
-      status: "resolved",
-      type: "amber"
-    },
-    {
-      id: "f2",
-      title: "Low battery voltage (resolved)",
-      vehicleNo: "KA 01 CD 7768",
-      date: "10 Jul 2026 - 04:21 PM",
-      status: "resolved",
-      type: "amber"
-    },
-    {
-      id: "f3",
-      title: "ABS sensor fault (open)",
-      vehicleNo: "TN 72 EF 9032",
-      date: "08 Jul 2026 - 09:15 AM",
-      status: "open",
-      type: "red"
+  let healthScore = 96;
+  let engineVal = 96;
+  let batteryVal = 95;
+  let brakesVal = 94;
+  let transmissionVal = 92;
+  let overallDesc = "Good";
+  let overallNote = "Vehicle operating within nominal thresholds";
+  let gaugeStroke = "#16a34a";
+
+  if (isOffline) {
+    healthScore = 15;
+    engineVal = 0;
+    batteryVal = 0;
+    brakesVal = 0;
+    transmissionVal = 0;
+    overallDesc = "Offline";
+    overallNote = "Diagnostic gateway unreachable";
+    gaugeStroke = "#94a3b8";
+  } else if (isNeedAttention) {
+    const isEngineIssue = vehicle.engineStatus && vehicle.engineStatus !== "Normal";
+    const isBatteryIssue = vehicle.batteryStatus && vehicle.batteryStatus !== "Good";
+    gaugeStroke = "#f59e0b";
+
+    if (isEngineIssue && isBatteryIssue) {
+      healthScore = 58;
+      engineVal = 52;
+      batteryVal = 48;
+      overallDesc = "Action Required";
+      overallNote = "Engine thermal & battery voltage issues detected";
+    } else if (isEngineIssue) {
+      healthScore = 64;
+      engineVal = 52;
+      overallDesc = "Attention Required";
+      overallNote = `Engine ${vehicle.engineStatus.toLowerCase()} detected`;
+    } else if (isBatteryIssue) {
+      healthScore = 68;
+      batteryVal = 48;
+      overallDesc = "Attention Required";
+      overallNote = `Battery ${vehicle.batteryStatus.toLowerCase()} detected`;
+    } else {
+      healthScore = 72;
+      overallDesc = "Maintenance Required";
+      overallNote = "Scheduled preventive service due";
     }
-  ];
+  }
+
+  // Dynamic recent faults for selected vehicle based on updated status
+  const recentFaults = isOffline
+    ? [
+        {
+          id: "f-off-1",
+          title: "Gateway packet timeout (Active)",
+          vehicleNo: vehicle.vehicleNo,
+          date: "Just now",
+          status: "open",
+          type: "red"
+        },
+        {
+          id: "f-off-2",
+          title: "J1939 CAN bus silent (Active)",
+          vehicleNo: vehicle.vehicleNo,
+          date: "Just now",
+          status: "open",
+          type: "red"
+        }
+      ]
+    : isNeedAttention
+    ? [
+        ...(vehicle.engineStatus && vehicle.engineStatus !== "Normal"
+          ? [
+              {
+                id: "f-eng-1",
+                title: `Engine coolant elevated / ${vehicle.engineStatus} (Active)`,
+                vehicleNo: vehicle.vehicleNo,
+                date: "Just now",
+                status: "open",
+                type: "amber"
+              }
+            ]
+          : []),
+        ...(vehicle.batteryStatus && vehicle.batteryStatus !== "Good"
+          ? [
+              {
+                id: "f-batt-1",
+                title: `Charging potential below nominal / ${vehicle.batteryStatus} (Active)`,
+                vehicleNo: vehicle.vehicleNo,
+                date: "Just now",
+                status: "open",
+                type: "amber"
+              }
+            ]
+          : []),
+        {
+          id: "f-prev-1",
+          title: "Scheduled service interval milestone",
+          vehicleNo: vehicle.vehicleNo,
+          date: "Yesterday",
+          status: "resolved",
+          type: "amber"
+        }
+      ]
+    : [
+        {
+          id: "f-clean-1",
+          title: "Coolant temperature spike (resolved)",
+          vehicleNo: vehicle.vehicleNo,
+          date: "12 Oct 2026 - 10:32 AM",
+          status: "resolved",
+          type: "amber"
+        },
+        {
+          id: "f-clean-2",
+          title: "Scheduled filter check (completed)",
+          vehicleNo: vehicle.vehicleNo,
+          date: "08 Oct 2026 - 04:21 PM",
+          status: "resolved",
+          type: "amber"
+        }
+      ];
 
   // SVG Circular Gauge calculations
   const radius = 54;
@@ -127,7 +216,7 @@ export default function HealthReportsScreen({
                   cy="65"
                   r={radius}
                   fill="none"
-                  stroke="#16a34a"
+                  stroke={gaugeStroke}
                   strokeWidth="11"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
@@ -143,15 +232,21 @@ export default function HealthReportsScreen({
 
             <div className="health-status-text-block">
               <span className="health-title-lbl">Overall Health</span>
-              <strong className="health-status-desc">Good</strong>
-              <small className="health-sub-note">Vehicle operating within nominal thresholds</small>
+              <strong className="health-status-desc">{overallDesc}</strong>
+              <small className="health-sub-note">{overallNote}</small>
             </div>
           </div>
 
-          {/* Right: Big Green Checkmark Icon matching Panel 6 */}
+          {/* Right: Status Icon matching status */}
           <div className="health-gauge-right">
-            <div className="status-checkmark-circle">
-              <CheckCircle2 size={42} className="check-icon-large" />
+            <div className={`status-checkmark-circle ${isHealthy ? "status-circle-green" : (isOffline ? "status-circle-offline" : "status-circle-amber")}`}>
+              {isHealthy ? (
+                <CheckCircle2 size={42} className="check-icon-large text-green" />
+              ) : isOffline ? (
+                <WifiOff size={42} className="check-icon-large text-slate" />
+              ) : (
+                <AlertTriangle size={42} className="check-icon-large text-amber" />
+              )}
             </div>
           </div>
         </div>
@@ -161,12 +256,12 @@ export default function HealthReportsScreen({
           <div className="subsystem-progress-item">
             <div className="subsystem-header">
               <span className="subsystem-name">Engine System</span>
-              <span className="subsystem-val">{vehicle.subsystems?.engine || 95}%</span>
+              <span className="subsystem-val">{engineVal}%</span>
             </div>
             <div className="progress-bar-bg">
               <div
-                className="progress-bar-fill fill-green"
-                style={{ width: `${vehicle.subsystems?.engine || 95}%` }}
+                className={`progress-bar-fill ${engineVal > 80 ? "fill-green" : (engineVal > 30 ? "fill-amber" : "fill-red")}`}
+                style={{ width: `${engineVal}%` }}
               />
             </div>
           </div>
@@ -174,12 +269,12 @@ export default function HealthReportsScreen({
           <div className="subsystem-progress-item">
             <div className="subsystem-header">
               <span className="subsystem-name">Battery & Alternator</span>
-              <span className="subsystem-val">{vehicle.subsystems?.battery || 92}%</span>
+              <span className="subsystem-val">{batteryVal}%</span>
             </div>
             <div className="progress-bar-bg">
               <div
-                className="progress-bar-fill fill-green"
-                style={{ width: `${vehicle.subsystems?.battery || 92}%` }}
+                className={`progress-bar-fill ${batteryVal > 80 ? "fill-green" : (batteryVal > 30 ? "fill-amber" : "fill-red")}`}
+                style={{ width: `${batteryVal}%` }}
               />
             </div>
           </div>
@@ -187,12 +282,12 @@ export default function HealthReportsScreen({
           <div className="subsystem-progress-item">
             <div className="subsystem-header">
               <span className="subsystem-name">Brakes (EBS/ABS)</span>
-              <span className="subsystem-val">{vehicle.subsystems?.brakes || 94}%</span>
+              <span className="subsystem-val">{brakesVal}%</span>
             </div>
             <div className="progress-bar-bg">
               <div
-                className="progress-bar-fill fill-green"
-                style={{ width: `${vehicle.subsystems?.brakes || 94}%` }}
+                className={`progress-bar-fill ${brakesVal > 80 ? "fill-green" : "fill-amber"}`}
+                style={{ width: `${brakesVal}%` }}
               />
             </div>
           </div>
@@ -200,12 +295,12 @@ export default function HealthReportsScreen({
           <div className="subsystem-progress-item">
             <div className="subsystem-header">
               <span className="subsystem-name">Transmission</span>
-              <span className="subsystem-val">{vehicle.subsystems?.transmission || 90}%</span>
+              <span className="subsystem-val">{transmissionVal}%</span>
             </div>
             <div className="progress-bar-bg">
               <div
-                className="progress-bar-fill fill-green"
-                style={{ width: `${vehicle.subsystems?.transmission || 90}%` }}
+                className={`progress-bar-fill ${transmissionVal > 80 ? "fill-green" : "fill-amber"}`}
+                style={{ width: `${transmissionVal}%` }}
               />
             </div>
           </div>

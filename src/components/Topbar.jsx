@@ -13,7 +13,9 @@ export default function Topbar({
   onLogout,
   searchQuery,
   setSearchQuery,
-  alerts = []
+  alerts = [],
+  onClearAllAlerts,
+  onDismissAlert
 }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
@@ -21,6 +23,34 @@ export default function Topbar({
   const userName = currentUser?.fullName?.split(" ")[0] || "Yuvaraj";
   const userEmail = currentUser?.email || "yuvaraj@example.com";
   const unreadAlertsCount = alerts.length;
+
+  const handleToggleAlerts = () => {
+    // If notifications are cleared (alerts.length === 0), do NOT display the popup
+    if (alerts.length === 0) {
+      setShowAlertsDropdown(false);
+      return;
+    }
+    setShowAlertsDropdown((prev) => !prev);
+    setShowUserDropdown(false);
+  };
+
+  const handleClearAll = (e) => {
+    e.stopPropagation();
+    if (onClearAllAlerts) {
+      onClearAllAlerts();
+    }
+    setShowAlertsDropdown(false);
+  };
+
+  const handleDismissSingleAlert = (e, alertId) => {
+    e.stopPropagation();
+    if (onDismissAlert) {
+      onDismissAlert(alertId);
+    }
+    if (alerts.length <= 1) {
+      setShowAlertsDropdown(false);
+    }
+  };
 
   return (
     <header className="hl-topbar-root">
@@ -72,11 +102,9 @@ export default function Topbar({
         <div className="hl-notify-wrapper">
           <button
             className="hl-icon-btn hl-bell-btn"
-            onClick={() => {
-              setShowAlertsDropdown(!showAlertsDropdown);
-              setShowUserDropdown(false);
-            }}
+            onClick={handleToggleAlerts}
             aria-label="Notifications"
+            title={unreadAlertsCount > 0 ? `${unreadAlertsCount} unread notifications` : "No notifications"}
           >
             <Bell size={19} />
             {unreadAlertsCount > 0 && (
@@ -84,15 +112,25 @@ export default function Topbar({
             )}
           </button>
 
-          {/* Alerts Dropdown Popover */}
-          {showAlertsDropdown && (
+          {/* Alerts Dropdown Popover (Only displays if there are active notifications) */}
+          {showAlertsDropdown && alerts.length > 0 && (
             <div className="hl-dropdown-menu alerts-dropdown">
-              <div className="dropdown-header">
-                <span className="dropdown-title">Fleet Notifications</span>
-                <span className="badge-count">{alerts.length} New</span>
+              <div className="dropdown-header alerts-dropdown-header">
+                <div className="dropdown-title-group">
+                  <span className="dropdown-title">Fleet Notifications</span>
+                  <span className="badge-count">{alerts.length} New</span>
+                </div>
+                <button
+                  type="button"
+                  className="hl-clear-all-btn"
+                  onClick={handleClearAll}
+                  title="Clear all notifications"
+                >
+                  Clear all
+                </button>
               </div>
               <div className="alerts-preview-list">
-                {alerts.slice(0, 4).map((alert) => (
+                {alerts.map((alert) => (
                   <div
                     key={alert.id}
                     className="alert-preview-item clickable"
@@ -107,6 +145,14 @@ export default function Topbar({
                       <div className="alert-prev-msg">{alert.message}</div>
                       <span className="alert-prev-time">{alert.time}</span>
                     </div>
+                    <button
+                      type="button"
+                      className="alert-item-close-btn"
+                      title="Dismiss notification"
+                      onClick={(e) => handleDismissSingleAlert(e, alert.id)}
+                    >
+                      <X size={13} />
+                    </button>
                   </div>
                 ))}
               </div>

@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import {
   Thermometer, Battery, WifiOff, ChevronRight, CheckCircle2,
-  AlertTriangle, ArrowLeft
+  AlertTriangle, ArrowLeft, Trash2, X
 } from "lucide-react";
 
-export default function AlertsScreen({ alerts, vehicles, onSelectVehicle }) {
+export default function AlertsScreen({
+  alerts,
+  vehicles,
+  onSelectVehicle,
+  onClearAllAlerts,
+  onDismissAlert
+}) {
   const [filterType, setFilterType] = useState("all"); // "all" | "critical" | "warning" | "info"
 
   const filteredAlerts = alerts.filter((a) => {
@@ -24,6 +30,17 @@ export default function AlertsScreen({ alerts, vehicles, onSelectVehicle }) {
           <h2 className="screen-title">Alerts & Notifications</h2>
           <p className="screen-subtitle">Stay informed about your fleet's health.</p>
         </div>
+        {alerts.length > 0 && onClearAllAlerts && (
+          <button
+            type="button"
+            className="hl-btn-outline-clear"
+            onClick={onClearAllAlerts}
+            title="Clear all fleet notifications"
+          >
+            <Trash2 size={15} />
+            <span>Clear All</span>
+          </button>
+        )}
       </div>
 
       {/* Filter Tabs matching Screen 6: All (3) | Critical (1) | Warning (1) | Info (1) */}
@@ -108,6 +125,19 @@ export default function AlertsScreen({ alerts, vehicles, onSelectVehicle }) {
                 <div className="alert-row-action">
                   <span className="view-link-text">View</span>
                   <ChevronRight size={16} className="view-chevron" />
+                  {onDismissAlert && (
+                    <button
+                      type="button"
+                      className="alert-row-dismiss-btn"
+                      title="Dismiss alert"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDismissAlert(alert.id);
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
             );

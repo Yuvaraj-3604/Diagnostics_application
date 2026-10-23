@@ -6,83 +6,56 @@ import {
 import truckThumb from "../assets/hauloop-truck.png";
 import { generateVehicleHealthReportPdf } from "../lib/pdfReportGenerator.js";
 
-// Standardized Vehicle Health Report data generator with current year 2026
+// Dynamic Vehicle Health Report data generator with Year 2026
 export function getVehicleHealthReportData(vehicle) {
   const vNo = vehicle?.vehicleNo || "TN 38 AB 4821";
-  const model = vehicle?.makeModel || `${vehicle?.make || "Commercial"} ${vehicle?.model || "Truck"}`;
+  const model = vehicle?.makeModel || `${vehicle?.make || "Ashok Leyland"} ${vehicle?.model || "3520"}`;
   const vin = vehicle?.vin || "MB1AA2K31L8765432";
   const driver = vehicle?.driver || "Assigned Fleet Driver";
   const odo = vehicle?.odometer || "42,580 km";
   const status = vehicle?.status || "Healthy";
+  const engineStatus = vehicle?.engineStatus || (status === "Offline" ? "Offline" : "Normal");
+  const batteryStatus = vehicle?.batteryStatus || (status === "Offline" ? "Offline" : "Good");
+  const fuelLevel = vehicle?.fuelLevel !== undefined ? vehicle.fuelLevel : 68;
+  const currentSpeed = vehicle?.currentSpeed !== undefined ? vehicle.currentSpeed : 62;
+  const engineRpm = vehicle?.engineRpm !== undefined ? vehicle.engineRpm : 1450;
+  const lastUpdated = vehicle?.lastUpdated || "Just now";
 
-  // Tailored report content per vehicle with Year 2026
-  if (vNo.includes("1188")) {
-    return {
-      reportId: "HLP-HLTH-1188",
-      generatedOn: "22-Oct-2026, 10:24",
-      reportPeriod: "01 Oct 2026 – 22 Oct 2026",
-      vehicleNo: vNo,
-      model,
-      vin,
-      driver,
-      odometer: odo,
-      overallStatus: "Needs Attention",
-      vehicleHealth: "Needs Attention",
-      summary:
-        "The available vehicle data indicates degraded charging circuit performance. One maintenance item requires attention. Please review the recommended action below.",
-      issueExplanation:
-        "Alternator charging voltage is detected at 21.8 V (nominal range 26.5 V – 28.0 V for 24V commercial vehicle electrical systems). Sustained under-voltage operation may lead to battery deep discharge, ECU communication reboots, or hard cranking in morning shifts.",
-      supportedParameters: [
-        { name: "Engine RPM", value: "1,120 rpm", status: "Supported" },
-        { name: "Vehicle Speed", value: "38 km/h", status: "Supported" },
-        { name: "Coolant Temperature", value: "86 °C", status: "Supported" },
-        { name: "Battery Voltage", value: "21.8 V", status: "Needs Attention", warning: true },
-        { name: "Fuel Level", value: "54%", status: "Supported" },
-        { name: "Fuel Rate", value: "16.0 L/h", status: "Supported" },
-        { name: "Engine Oil Pressure", value: "3.9 bar", status: "Supported" },
-        { name: "Retarder Torque", value: "Unavailable", status: "Unavailable" },
-        { name: "Transmission Sump Temp", value: "Unavailable", status: "Unavailable" },
-        { name: "DPF Differential Pressure", value: "2.1 kPa", status: "Supported" }
-      ],
-      faultCodes: [
-        { code: "SPN 168 FMI 1", description: "Electrical Potential (Voltage) Below Normal Operating Range", status: "Active" },
-        { code: "SPN 158 FMI 0", description: "Key Switch Battery Potential Fluctuation", status: "Pending" }
-      ],
-      rawCanIds: ["0x0CF00400 (EEC1)", "0x18FEF200 (LFE)", "0x18FEEE00 (ET1)", "0x18FEF700 (VEP)"],
-      lastDataReceived: "22-Oct-2026, 10:12 AM",
-      connectionStatus: "Online",
-      dataFreshness: "Current",
-      unavailableParameters: "Retarder Torque, Transmission Sump Temperature",
-      reportLimitations:
-        "Battery internal chemical impedance estimation is unavailable via standard SAE J1939 telematics; physical carbon pile battery load test recommended at terminal.",
-      assessment: "Maintenance Recommended",
-      summaryForCustomer:
-        "Vehicle TN 72 CD 1188 exhibits low battery charging voltage (21.8 V). The truck remains drivable, but charging performance is compromised. Next recommended step: Schedule electrical system checkup for alternator diode pack, drive belt tension, and battery terminal contacts within 48 hours."
-    };
-  }
+  // Deterministic 4-digit code for report ID
+  const cleanNum = vNo.replace(/[^0-9]/g, "").slice(-4) || "4821";
+  const reportId = `HLP-HLTH-${cleanNum}`;
 
-  if (vNo.includes("3377")) {
+  const generatedOn = "23-Oct-2026, 10:24 AM";
+  const reportPeriod = "01 Oct 2026 – 23 Oct 2026";
+
+  // ========================================================
+  // CASE 1: OFFLINE STATUS
+  // ========================================================
+  if (status === "Offline" || engineStatus === "Offline" || batteryStatus === "Offline") {
     return {
-      reportId: "HLP-HLTH-3377",
-      generatedOn: "22-Oct-2026, 10:24",
-      reportPeriod: "01 Oct 2026 – 22 Oct 2026",
+      reportId,
+      generatedOn,
+      reportPeriod,
       vehicleNo: vNo,
       model,
       vin,
       driver,
       odometer: odo,
       overallStatus: "Critical",
-      vehicleHealth: "Critical",
+      vehicleHealth: "Offline",
+      assessment: "Inspection Required",
+      connectionStatus: "Offline",
+      dataFreshness: "Stale (Gateway Offline)",
       summary:
-        "The connected diagnostic gateway is offline with no live telematics received for over 5 hours. Physical inspection required.",
+        `Diagnostic gateway on ${vNo} is currently offline. No live telemetry packets received from the onboard FMC650 unit.`,
       issueExplanation:
-        "Gateway heartbeat packet timeout detected. Last broadcast telemetry was logged near NH44 bypass corridor. Vehicle battery master isolation switch may have been actuated, or telematics harness was unplugged during maintenance.",
+        `Gateway heartbeat packet timeout detected. Powertrain CAN telemetry broadcast is inactive. Master battery isolation switch may have been opened, or telematics harness was unplugged during maintenance.`,
       supportedParameters: [
         { name: "Engine RPM", value: "Unavailable", status: "Unavailable" },
         { name: "Vehicle Speed", value: "0 km/h (Last Known)", status: "Unavailable" },
         { name: "Coolant Temperature", value: "Unavailable", status: "Unavailable" },
         { name: "Battery Voltage", value: "Unavailable", status: "Unavailable" },
-        { name: "Fuel Level", value: "32% (Last Known)", status: "Unavailable" },
+        { name: "Fuel Level", value: `${fuelLevel}% (Last Known)`, status: "Unavailable" },
         { name: "Fuel Rate", value: "Unavailable", status: "Unavailable" },
         { name: "Engine Oil Pressure", value: "Unavailable", status: "Unavailable" },
         { name: "Retarder Torque", value: "Unavailable", status: "Unavailable" },
@@ -94,105 +67,160 @@ export function getVehicleHealthReportData(vehicle) {
         { code: "CAN-BUS-SILENT", description: "Powertrain CAN Bus J1939 Broadcast Inactive", status: "Active" }
       ],
       rawCanIds: ["Last Logged: 0x0CF00400", "Last Logged: 0x18FEEE00"],
-      lastDataReceived: "22-Oct-2026, 05:22 AM (5 hr ago)",
-      connectionStatus: "Offline",
-      dataFreshness: "Stale",
+      lastDataReceived: `Historical log (${lastUpdated})`,
       unavailableParameters: "All live CAN parameters currently unavailable (Gateway Offline)",
       reportLimitations:
         "Live telemetry unavailable due to gateway offline condition. Historical parameters from flash memory buffer displayed.",
-      assessment: "Inspection Required",
       summaryForCustomer:
-        "Vehicle TN 66 EF 3377 has been offline for over 5 hours. Telematics connection is interrupted. Next recommended step: Contact driver Karthik immediately to verify vehicle safety and check telematics gateway fuse/power harness."
+        `Vehicle ${vNo} has been reported offline. Cellular modem and J1939 link are disconnected. Next recommended step: Contact assigned driver ${driver} immediately to verify vehicle safety and inspect telematics gateway power harness.`
     };
   }
 
-  if (vNo.includes("2299")) {
+  // ========================================================
+  // CASE 2: NEED ATTENTION STATUS
+  // ========================================================
+  if (status === "Need Attention" || status === "Attention" || engineStatus !== "Normal" || batteryStatus !== "Good") {
+    const isEngineIssue = engineStatus !== "Normal";
+    const isBatteryIssue = batteryStatus !== "Good";
+
+    let issueTitle = "Maintenance required";
+    let issueExplanation = "";
+    let coolantVal = "82 °C";
+    let coolantWarning = false;
+    let batteryVal = "26.4 V";
+    let batteryWarning = false;
+    let faultCodes = [];
+    let assessment = "Maintenance Recommended";
+    let nextStep = "";
+
+    if (isEngineIssue && isBatteryIssue) {
+      issueTitle = `Engine (${engineStatus}) and Battery (${batteryStatus}) issues detected`;
+      issueExplanation = `Multiple subsystem anomalies detected. Engine thermal sensor indicates elevated coolant temperature (104 °C) with transient thermal derate, and alternator charging circuit is under-voltage (21.8 V vs 26.5 V nominal threshold).`;
+      coolantVal = "104 °C (Elevated)";
+      coolantWarning = true;
+      batteryVal = "21.8 V (Low Voltage)";
+      batteryWarning = true;
+      assessment = "Urgent Maintenance Required";
+      faultCodes = [
+        { code: "SPN 110 FMI 0", description: `Engine Coolant Temperature High / Engine ${engineStatus}`, status: "Active" },
+        { code: "SPN 168 FMI 1", description: `Electrical Potential Below Normal / Battery ${batteryStatus}`, status: "Active" }
+      ];
+      nextStep = `Schedule immediate depot inspection for engine cooling circuit and alternator charging system within 24 hours.`;
+    } else if (isEngineIssue) {
+      issueTitle = `Engine status anomaly: ${engineStatus}`;
+      issueExplanation = `Powertrain CAN telemetry indicates engine parameter deviation (${engineStatus}). Peak coolant temperature recorded at 104 °C exceeding 98 °C threshold. ECU thermal derate protection active.`;
+      coolantVal = "104 °C (Elevated)";
+      coolantWarning = true;
+      assessment = "Engine Service Required";
+      faultCodes = [
+        { code: "SPN 110 FMI 0", description: `Engine Coolant Temperature High / Engine ${engineStatus}`, status: "Active" }
+      ];
+      nextStep = `Inspect coolant reservoir level, radiator fan clutch, and thermostat valve at next depot stop within 24 hours.`;
+    } else if (isBatteryIssue) {
+      issueTitle = `Degraded electrical charging circuit (${batteryStatus})`;
+      issueExplanation = `Alternator charging voltage is detected at 21.8 V (nominal range 26.5 V – 28.0 V for 24V commercial vehicle electrical systems). Sustained under-voltage operation risks starter lockout or ECU communication brownout.`;
+      batteryVal = "21.8 V (Low Voltage)";
+      batteryWarning = true;
+      assessment = "Electrical Checkup Required";
+      faultCodes = [
+        { code: "SPN 168 FMI 1", description: `Electrical Potential Below Normal / Battery ${batteryStatus}`, status: "Active" }
+      ];
+      nextStep = `Schedule electrical system checkup for alternator diode pack, drive belt tension, and battery terminal contacts within 48 hours.`;
+    } else {
+      issueTitle = "Scheduled preventive maintenance due";
+      issueExplanation = "Vehicle diagnostics system flagged routine service interval milestone and parameter checkup advisory. Core powertrain systems remain in operational bounds.";
+      assessment = "Maintenance Recommended";
+      faultCodes = [
+        { code: "DTC-SERV-01", description: "Scheduled Preventive Maintenance Advisory", status: "Active" }
+      ];
+      nextStep = `Route vehicle to nearest fleet service hub for regular preventive maintenance checkup.`;
+    }
+
     return {
-      reportId: "HLP-HLTH-2299",
-      generatedOn: "22-Oct-2026, 10:24",
-      reportPeriod: "01 Oct 2026 – 22 Oct 2026",
+      reportId,
+      generatedOn,
+      reportPeriod,
       vehicleNo: vNo,
       model,
       vin,
       driver,
       odometer: odo,
-      overallStatus: "Healthy",
-      vehicleHealth: "Healthy",
-      summary:
-        "The available vehicle data indicates optimal operating conditions. All monitored parameters are within factory specifications.",
-      issueExplanation:
-        "No anomalous engine, electrical, or emission parameters detected. Transmission fluid temperature and engine RPM operating in optimal fuel-efficiency zone. ECU diagnostic freeze frames contain 0 active DTCs.",
-      supportedParameters: [
-        { name: "Engine RPM", value: "1,380 rpm", status: "Supported" },
-        { name: "Vehicle Speed", value: "68 km/h", status: "Supported" },
-        { name: "Coolant Temperature", value: "81 °C", status: "Supported" },
-        { name: "Battery Voltage", value: "27.4 V", status: "Supported" },
-        { name: "Fuel Level", value: "78%", status: "Supported" },
-        { name: "Fuel Rate", value: "22.4 L/h", status: "Supported" },
-        { name: "Engine Oil Pressure", value: "4.5 bar", status: "Supported" },
-        { name: "Retarder Torque", value: "0 %", status: "Supported" },
-        { name: "Transmission Sump Temp", value: "76 °C", status: "Supported" },
-        { name: "DPF Differential Pressure", value: "1.4 kPa", status: "Supported" }
-      ],
-      faultCodes: [],
-      rawCanIds: ["0x0CF00400 (EEC1)", "0x18FEF200 (LFE)", "0x18FEEE00 (ET1)", "0x18F0010B (ETC1)"],
-      lastDataReceived: "22-Oct-2026, 10:18 AM",
+      overallStatus: "Needs Attention",
+      vehicleHealth: "Needs Attention",
+      assessment,
       connectionStatus: "Online",
       dataFreshness: "Current",
-      unavailableParameters: "None",
-      reportLimitations: "None. Full dual-channel J1939 broadcast operational.",
-      assessment: "Healthy",
+      summary:
+        `Diagnostic data for ${vNo} indicates ${issueTitle.toLowerCase()}. Active diagnostic trouble code(s) logged. Please review the recommended action below.`,
+      issueExplanation,
+      supportedParameters: [
+        { name: "Engine RPM", value: `${engineRpm} rpm`, status: "Supported" },
+        { name: "Vehicle Speed", value: `${currentSpeed} km/h`, status: "Supported" },
+        { name: "Coolant Temperature", value: coolantVal, status: coolantWarning ? "Needs Attention" : "Supported", warning: coolantWarning },
+        { name: "Battery Voltage", value: batteryVal, status: batteryWarning ? "Needs Attention" : "Supported", warning: batteryWarning },
+        { name: "Fuel Level", value: `${fuelLevel}%`, status: "Supported" },
+        { name: "Fuel Rate", value: "18.5 L/h", status: "Supported" },
+        { name: "Engine Oil Pressure", value: "3.9 bar", status: "Supported" },
+        { name: "Retarder Torque", value: "Unavailable", status: "Unavailable" },
+        { name: "Transmission Sump Temp", value: "Unavailable", status: "Unavailable" },
+        { name: "DPF Differential Pressure", value: "2.1 kPa", status: "Supported" }
+      ],
+      faultCodes,
+      rawCanIds: ["0x0CF00400 (EEC1)", "0x18FEF200 (LFE)", "0x18FEEE00 (ET1)", "0x18FEF700 (VEP)"],
+      lastDataReceived: "23-Oct-2026, 10:22 AM",
+      unavailableParameters: "Retarder Torque, Transmission Sump Temperature",
+      reportLimitations:
+        "Standard SAE J1939 telematics stream active. Specialized physical load tests recommended at service depot.",
       summaryForCustomer:
-        "Vehicle TN 55 GH 2299 is running in peak condition with zero fault codes. All powertrain systems and emissions components are fully compliant. Continue regular scheduled operations."
+        `Vehicle ${vNo} (${model}) assigned to driver ${driver} requires attention: ${issueTitle}. The truck remains drivable with caution. Next recommended step: ${nextStep}`
     };
   }
 
-  // Default / TN 38 AB 4821 (Year 2026)
+  // ========================================================
+  // CASE 3: HEALTHY STATUS (DEFAULT)
+  // ========================================================
   return {
-    reportId: "HLP-HLTH-4821",
-    generatedOn: "22-Oct-2026, 10:24",
-    reportPeriod: "01 Oct 2026 – 22 Oct 2026",
+    reportId,
+    generatedOn,
+    reportPeriod,
     vehicleNo: vNo,
     model,
     vin,
     driver,
     odometer: odo,
-    overallStatus: status === "Offline" ? "Critical" : (status === "Need Attention" ? "Needs Attention" : "Healthy"),
-    vehicleHealth: status === "Offline" ? "Critical" : (status === "Need Attention" ? "Needs Attention" : "Healthy"),
+    overallStatus: "Healthy",
+    vehicleHealth: "Healthy",
+    assessment: "Healthy",
+    connectionStatus: "Online",
+    dataFreshness: "Current",
     summary:
-      "The available vehicle data indicates normal operating conditions. One maintenance item requires attention. Please review the recommended action below.",
+      `The available vehicle diagnostic data for ${vNo} indicates optimal operating conditions. All monitored powertrain, electrical, and emissions subsystems are operating strictly within factory specifications.`,
     issueExplanation:
-      "Transient coolant temperature elevation (peak 88 °C) was recorded during gradient payload climb on highway. Core telemetry parameters have stabilized back to nominal 82 °C. Secondary auxiliary bus signals are operating as expected.",
+      "No anomalous engine, electrical, or emission parameters detected. Transmission fluid temperature, oil pressure, and charging voltage are operating in the optimal efficiency zone with zero active DTCs.",
     supportedParameters: [
-      { name: "Engine RPM", value: "1,450 rpm", status: "Supported" },
-      { name: "Vehicle Speed", value: "62 km/h", status: "Supported" },
+      { name: "Engine RPM", value: `${engineRpm} rpm`, status: "Supported" },
+      { name: "Vehicle Speed", value: `${currentSpeed} km/h`, status: "Supported" },
       { name: "Coolant Temperature", value: "82 °C", status: "Supported" },
-      { name: "Battery Voltage", value: "26.4 V", status: "Supported" },
-      { name: "Fuel Level", value: "68%", status: "Supported" },
+      { name: "Battery Voltage", value: "27.4 V", status: "Supported" },
+      { name: "Fuel Level", value: `${fuelLevel}%`, status: "Supported" },
       { name: "Fuel Rate", value: "18.5 L/h", status: "Supported" },
       { name: "Engine Oil Pressure", value: "4.2 bar", status: "Supported" },
       { name: "Retarder Torque", value: "Unavailable", status: "Unavailable" },
       { name: "Transmission Sump Temp", value: "Unavailable", status: "Unavailable" },
-      { name: "DPF Differential Pressure", value: "1.8 kPa", status: "Supported" }
+      { name: "DPF Differential Pressure", value: "1.6 kPa", status: "Supported" }
     ],
-    faultCodes: [
-      { code: "SPN 110 FMI 0", description: "Engine Coolant Temperature High (Resolved / Historical Log)", status: "Resolved" }
-    ],
-    rawCanIds: ["0x0CF00400 (EEC1)", "0x18FEF200 (LFE)", "0x18FEEE00 (ET1)", "0x18FEF600 (IC1)"],
-    lastDataReceived: "22-Oct-2026, 10:22 AM",
-    connectionStatus: "Online",
-    dataFreshness: "Current",
+    faultCodes: [],
+    rawCanIds: ["0x0CF00400 (EEC1)", "0x18FEF200 (LFE)", "0x18FEEE00 (ET1)", "0x18F0010B (ETC1)"],
+    lastDataReceived: "23-Oct-2026, 10:22 AM",
     unavailableParameters: "Retarder Torque, Transmission Sump Temperature",
-    reportLimitations:
-      "Chassis is not equipped with hydraulic retarder or secondary transmission CAN gateway. Powertrain J1939 broadcast is 100% operational.",
-    assessment: "Healthy",
+    reportLimitations: "None. Dual-channel J1939 broadcast operational with 0 DTCs.",
     summaryForCustomer:
-      "Vehicle TN 38 AB 4821 is in sound operating health with no active critical faults. Engine RPM, oil pressure, and charging voltage are normal. Next recommended step: Check coolant reservoir level at next depot stop as preventive care."
+      `Vehicle ${vNo} is in sound operating health with no active critical faults. Engine RPM, oil pressure, and charging voltage are normal. Next recommended step: Continue regular scheduled fleet operations.`
   };
 }
 
-export default function ReportsScreen({ vehicles = [] }) {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function ReportsScreen({ vehicles = [], selectedVehicle = null }) {
+  const [searchQuery, setSearchQuery] = useState(() => selectedVehicle?.vehicleNo || "");
   const [statusFilter, setStatusFilter] = useState("all");
   const [downloadSuccessMsg, setDownloadSuccessMsg] = useState(null);
   const [viewingReportVehicle, setViewingReportVehicle] = useState(null);

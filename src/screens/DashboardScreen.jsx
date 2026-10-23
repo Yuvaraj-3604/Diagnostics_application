@@ -9,7 +9,8 @@ export default function DashboardScreen({
   alerts,
   currentUser,
   setPage,
-  onSelectVehicle
+  onSelectVehicle,
+  onNavigateVehicles
 }) {
   const userName = currentUser?.fullName?.split(" ")[0] || "Yuvaraj";
 
@@ -32,6 +33,14 @@ export default function DashboardScreen({
   const circumference = 2 * Math.PI * radius; // ~314.16
   const strokeDashoffset = circumference - (healthyPct / 100) * circumference;
 
+  const handleGoVehicles = (status = "all") => {
+    if (onNavigateVehicles) {
+      onNavigateVehicles(status);
+    } else {
+      setPage("vehicles");
+    }
+  };
+
   return (
     <div className="dashboard-content-container">
       {/* 2. Dashboard / Overview Header Banner */}
@@ -42,7 +51,7 @@ export default function DashboardScreen({
         </div>
         <button
           className="hl-btn-primary hl-btn-icon-right"
-          onClick={() => setPage("vehicles")}
+          onClick={() => handleGoVehicles("all")}
         >
           <span>View all vehicles</span>
           <ArrowRight size={16} />
@@ -54,7 +63,7 @@ export default function DashboardScreen({
         {/* Metric 1: Total Vehicles */}
         <div
           className="metric-card metric-total clickable"
-          onClick={() => setPage("vehicles")}
+          onClick={() => handleGoVehicles("all")}
         >
           <div className="metric-icon-wrap total-icon">
             <Truck size={22} />
@@ -70,7 +79,7 @@ export default function DashboardScreen({
         {/* Metric 2: Healthy */}
         <div
           className="metric-card metric-healthy clickable"
-          onClick={() => setPage("vehicles")}
+          onClick={() => handleGoVehicles("healthy")}
         >
           <div className="metric-icon-wrap healthy-icon">
             <ShieldCheck size={22} />
@@ -83,10 +92,10 @@ export default function DashboardScreen({
           </div>
         </div>
 
-        {/* Metric 3: Need Attention */}
+        {/* Metric 3: Need Attention (Redirects to vehicles page with attention filter) */}
         <div
           className="metric-card metric-attention clickable"
-          onClick={() => setPage("alerts")}
+          onClick={() => handleGoVehicles("attention")}
         >
           <div className="metric-icon-wrap attention-icon">
             <AlertTriangle size={22} />
@@ -99,10 +108,10 @@ export default function DashboardScreen({
           </div>
         </div>
 
-        {/* Metric 4: Offline */}
+        {/* Metric 4: Offline (Redirects to vehicles page with offline filter) */}
         <div
           className="metric-card metric-offline clickable"
-          onClick={() => setPage("alerts")}
+          onClick={() => handleGoVehicles("offline")}
         >
           <div className="metric-icon-wrap offline-icon">
             <WifiOff size={22} />
@@ -158,19 +167,31 @@ export default function DashboardScreen({
 
             {/* Legend matching Screen 2 */}
             <div className="donut-legend-list">
-              <div className="donut-legend-item">
+              <div
+                className="donut-legend-item clickable"
+                onClick={() => handleGoVehicles("healthy")}
+                title="Filter healthy vehicles"
+              >
                 <div className="legend-indicator dot-healthy" />
                 <span className="legend-name">Healthy</span>
                 <span className="legend-count">{healthyCount}</span>
               </div>
 
-              <div className="donut-legend-item">
+              <div
+                className="donut-legend-item clickable"
+                onClick={() => handleGoVehicles("attention")}
+                title="Filter vehicles needing attention"
+              >
                 <div className="legend-indicator dot-attention" />
                 <span className="legend-name">Need Attention</span>
                 <span className="legend-count">{attentionCount}</span>
               </div>
 
-              <div className="donut-legend-item">
+              <div
+                className="donut-legend-item clickable"
+                onClick={() => handleGoVehicles("offline")}
+                title="Filter offline vehicles"
+              >
                 <div className="legend-indicator dot-offline" />
                 <span className="legend-name">Offline</span>
                 <span className="legend-count">{offlineCount}</span>
@@ -245,7 +266,7 @@ export default function DashboardScreen({
           <h3 className="hl-card-title">Recent Vehicles</h3>
           <button
             className="hl-link-btn"
-            onClick={() => setPage("vehicles")}
+            onClick={() => handleGoVehicles("all")}
           >
             <span>View all vehicles</span>
             <ArrowRight size={14} />
