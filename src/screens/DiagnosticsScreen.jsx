@@ -414,7 +414,7 @@ export default function DiagnosticsScreen({
               <h3 className="hl-card-title">Engine Subsystem Health (SAE J1939)</h3>
               <span className="status-pill badge-healthy">6 of 6 Subsystems Normal</span>
             </div>
-            <div className="engine-subsystems-table-wrap">
+            <div className="engine-subsystems-table-wrap table-responsive">
               <table className="hl-table">
                 <thead>
                   <tr>
@@ -613,7 +613,7 @@ export default function DiagnosticsScreen({
               <h3 className="hl-card-title">Fuel Injection & Emissions Telemetry</h3>
               <span className="status-pill badge-healthy">Common Rail Injection Healthy</span>
             </div>
-            <div className="engine-subsystems-table-wrap">
+            <div className="engine-subsystems-table-wrap table-responsive">
               <table className="hl-table">
                 <thead>
                   <tr>
@@ -677,60 +677,62 @@ export default function DiagnosticsScreen({
             </div>
           </div>
 
-          <table className="hl-table">
-            <thead>
-              <tr>
-                <th>Signal Name</th>
-                <th>SPN</th>
-                <th>PGN</th>
-                <th>Decoded Value</th>
-                <th>Formula / Scaling</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Engine Speed</strong></td>
-                <td className="mono">190</td>
-                <td className="mono">61444 (0xF004)</td>
-                <td className="mono highlight">{vehicle.engineRpm || 1450} RPM</td>
-                <td>raw × 0.125</td>
-                <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
-              </tr>
-              <tr>
-                <td><strong>Vehicle Speed</strong></td>
-                <td className="mono">84</td>
-                <td className="mono">65265 (0xFEF1)</td>
-                <td className="mono highlight">{vehicle.currentSpeed || 62} km/h</td>
-                <td>raw × 1/256 km/h</td>
-                <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
-              </tr>
-              <tr>
-                <td><strong>Coolant Temperature</strong></td>
-                <td className="mono">110</td>
-                <td className="mono">65262 (0xFEEE)</td>
-                <td className="mono highlight">{vehicle.coolantTemp || "82 °C"}</td>
-                <td>raw - 40 °C</td>
-                <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
-              </tr>
-              <tr>
-                <td><strong>Battery Potential (Voltage)</strong></td>
-                <td className="mono">168</td>
-                <td className="mono">65271 (0xFEF7)</td>
-                <td className="mono highlight">{vehicle.batteryVoltage || "26.4 V"}</td>
-                <td>raw × 0.05 V</td>
-                <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
-              </tr>
-              <tr>
-                <td><strong>Fuel Delivery Rate</strong></td>
-                <td className="mono">183</td>
-                <td className="mono">65266 (0xFEF2)</td>
-                <td className="mono highlight">{vehicle.fuelRate || "18.5 L/h"}</td>
-                <td>raw × 0.05 L/h</td>
-                <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="table-responsive">
+            <table className="hl-table">
+              <thead>
+                <tr>
+                  <th>Signal Name</th>
+                  <th>SPN</th>
+                  <th>PGN</th>
+                  <th>Decoded Value</th>
+                  <th>Formula / Scaling</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Engine Speed</strong></td>
+                  <td className="mono">190</td>
+                  <td className="mono">61444 (0xF004)</td>
+                  <td className="mono highlight">{vehicle.engineRpm || 1450} RPM</td>
+                  <td>raw × 0.125</td>
+                  <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Vehicle Speed</strong></td>
+                  <td className="mono">84</td>
+                  <td className="mono">65265 (0xFEF1)</td>
+                  <td className="mono highlight">{vehicle.currentSpeed || 62} km/h</td>
+                  <td>raw × 1/256 km/h</td>
+                  <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Coolant Temperature</strong></td>
+                  <td className="mono">110</td>
+                  <td className="mono">65262 (0xFEEE)</td>
+                  <td className="mono highlight">{vehicle.coolantTemp || "82 °C"}</td>
+                  <td>raw - 40 °C</td>
+                  <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Battery Potential (Voltage)</strong></td>
+                  <td className="mono">168</td>
+                  <td className="mono">65271 (0xFEF7)</td>
+                  <td className="mono highlight">{vehicle.batteryVoltage || "26.4 V"}</td>
+                  <td>raw × 0.05 V</td>
+                  <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Fuel Delivery Rate</strong></td>
+                  <td className="mono">183</td>
+                  <td className="mono">65266 (0xFEF2)</td>
+                  <td className="mono highlight">{vehicle.fuelRate || "18.5 L/h"}</td>
+                  <td>raw × 0.05 L/h</td>
+                  <td><span className="status-pill pill-healthy"><span className="status-dot" />Receiving</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

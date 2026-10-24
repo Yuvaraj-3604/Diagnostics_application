@@ -456,44 +456,46 @@ export default function VehicleDetailsScreen({
           <div className="hl-card-header">
             <h3 className="hl-card-title">Recent Trips & Routes</h3>
           </div>
-          <table className="hl-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Route</th>
-                <th>Distance</th>
-                <th>Travel Time</th>
-                <th>Fuel Used</th>
-                <th>Avg Speed</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>21 Oct 2026</td>
-                <td>Coimbatore Depot → Perundurai SIPCOT</td>
-                <td>84 km</td>
-                <td>2h 15m</td>
-                <td>18.5 L</td>
-                <td>52 km/h</td>
-              </tr>
-              <tr>
-                <td>20 Oct 2026</td>
-                <td>Tiruppur Hub → Coimbatore Logistics Yard</td>
-                <td>68 km</td>
-                <td>1h 45m</td>
-                <td>15.2 L</td>
-                <td>49 km/h</td>
-              </tr>
-              <tr>
-                <td>19 Oct 2026</td>
-                <td>Salem Freight Gateway → Tiruppur</td>
-                <td>92 km</td>
-                <td>2h 30m</td>
-                <td>20.0 L</td>
-                <td>51 km/h</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="table-responsive trip-history-table-wrap">
+            <table className="hl-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Route</th>
+                  <th>Distance</th>
+                  <th>Travel Time</th>
+                  <th>Fuel Used</th>
+                  <th>Avg Speed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>21 Oct 2026</td>
+                  <td>Coimbatore Depot → Perundurai SIPCOT</td>
+                  <td>84 km</td>
+                  <td>2h 15m</td>
+                  <td>18.5 L</td>
+                  <td>52 km/h</td>
+                </tr>
+                <tr>
+                  <td>20 Oct 2026</td>
+                  <td>Tiruppur Hub → Coimbatore Logistics Yard</td>
+                  <td>68 km</td>
+                  <td>1h 45m</td>
+                  <td>15.2 L</td>
+                  <td>49 km/h</td>
+                </tr>
+                <tr>
+                  <td>19 Oct 2026</td>
+                  <td>Salem Freight Gateway → Tiruppur</td>
+                  <td>92 km</td>
+                  <td>2h 30m</td>
+                  <td>20.0 L</td>
+                  <td>51 km/h</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -785,28 +787,30 @@ export default function VehicleDetailsScreen({
                 {/* 4. Monitored Parameters */}
                 <div className="report-view-section">
                   <h4 className="report-view-sec-title">Monitored SAE J1939 Telemetry Parameters</h4>
-                  <table className="hl-table report-params-table">
-                    <thead>
-                      <tr>
-                        <th>Parameter</th>
-                        <th>Live Telemetry Value</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rep.supportedParameters.map((p, i) => (
-                        <tr key={i} className={p.warning ? "row-warning" : ""}>
-                          <td><strong>{p.name}</strong></td>
-                          <td><code>{p.value}</code></td>
-                          <td>
-                            <span className={`status-pill ${p.warning ? "badge-attention" : (p.status === "Supported" ? "badge-healthy" : "badge-unavailable")}`}>
-                              {p.status}
-                            </span>
-                          </td>
+                  <div className="table-responsive">
+                    <table className="hl-table report-params-table">
+                      <thead>
+                        <tr>
+                          <th>Parameter</th>
+                          <th>Live Telemetry Value</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {rep.supportedParameters.map((p, i) => (
+                          <tr key={i} className={p.warning ? "row-warning" : ""}>
+                            <td><strong>{p.name}</strong></td>
+                            <td><code>{p.value}</code></td>
+                            <td>
+                              <span className={`status-pill ${p.warning ? "badge-attention" : (p.status === "Supported" ? "badge-healthy" : "badge-unavailable")}`}>
+                                {p.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
                 {/* 5. Active DTCs */}
