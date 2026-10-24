@@ -1,12 +1,16 @@
 import { jsPDF } from "jspdf";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 /**
  * Generates an official, beautifully styled PDF Vehicle Health Report
  * matching the user's standardized diagnostic template.
+ * Works natively on Desktop Web, Mobile Browsers, and Android Capacitor APK.
  *
  * @param {Object} report - Structured vehicle health report data
  */
-export function generateVehicleHealthReportPdf(report) {
+export async function generateVehicleHealthReportPdf(report) {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -424,26 +428,75 @@ export function generateVehicleHealthReportPdf(report) {
   // Save the PDF file
   const fileName = `Vehicle_Health_Report_${report.vehicleNo.replace(/\s+/g, "_")}_2026.pdf`;
 
-  // On Mobile / Android APK: Support native Android share/open drawer
+  // 1. Native Capacitor Android APK platform
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const dataUri = doc.output("datauristring");
+      const base64Data = dataUri.split(",")[1];
+
+      // Write file into Cache directory (guaranteed writable without special runtime permissions)
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64Data,
+        directory: Directory.Cache,
+        recursive: true
+      });
+
+      // Prompt native Android Share / Save Sheet (Save to Downloads, Drive, PDF Viewer, etc.)
+      await Share.share({
+        title: `Vehicle Health Report - ${report.vehicleNo}`,
+        text: `HAULOOP Vehicle Health Diagnostic Report for ${report.vehicleNo} (SAE J1939)`,
+        url: savedFile.uri,
+        dialogTitle: `Download / Save ${fileName}`
+      });
+
+      return { success: true, fileName, uri: savedFile.uri };
+    } catch (nativeErr) {
+      console.warn("Capacitor Filesystem / Share error:", nativeErr);
+      try {
+        // Fallback: try writing to Documents directory
+        const dataUri = doc.output("datauristring");
+        const base64Data = dataUri.split(",")[1];
+        const docFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents,
+          recursive: true
+        });
+        await Share.share({
+          title: `Vehicle Health Report - ${report.vehicleNo}`,
+          url: docFile.uri,
+          dialogTitle: `Save ${fileName}`
+        });
+        return { success: true, fileName, uri: docFile.uri };
+      } catch (fallbackErr) {
+        console.warn("Documents directory fallback also failed, falling back to doc.save:", fallbackErr);
+        doc.save(fileName);
+        return { success: true, fileName };
+      }
+    }
+  }
+
+  // 2. Mobile Browser with Web Share API
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   if (isMobile && navigator.canShare) {
     try {
       const pdfBlob = doc.output("blob");
       const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
       if (navigator.canShare({ files: [pdfFile] })) {
-        navigator.share({
+        await navigator.share({
           files: [pdfFile],
           title: `Vehicle Health Report - ${report.vehicleNo}`,
           text: `Hauloop Vehicle Health Diagnostic Report for ${report.vehicleNo} (Year 2026)`
-        }).catch(() => {
-          doc.save(fileName);
         });
-        return;
+        return { success: true, fileName };
       }
     } catch (err) {
       console.warn("Mobile share fallback to doc.save:", err);
     }
   }
 
+  // 3. Desktop / Standard browser download
   doc.save(fileName);
+  return { success: true, fileName };
 }

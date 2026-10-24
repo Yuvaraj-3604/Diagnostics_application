@@ -226,11 +226,11 @@ export default function ReportsScreen({ vehicles = [], selectedVehicle = null })
   const [viewingReportVehicle, setViewingReportVehicle] = useState(null);
 
   // Download PDF handler for an individual vehicle
-  const handleDownloadVehiclePdf = (vehicle) => {
+  const handleDownloadVehiclePdf = async (vehicle) => {
     try {
       const reportData = getVehicleHealthReportData(vehicle);
-      generateVehicleHealthReportPdf(reportData);
-      setDownloadSuccessMsg(`Vehicle Health Report PDF for ${vehicle.vehicleNo} generated! Check your phone's "Downloads" folder or "Files" app.`);
+      await generateVehicleHealthReportPdf(reportData);
+      setDownloadSuccessMsg(`Vehicle Health Report PDF for ${vehicle.vehicleNo} ready!`);
       setTimeout(() => setDownloadSuccessMsg(null), 5000);
     } catch (err) {
       console.error("PDF generation failed:", err);
@@ -238,15 +238,19 @@ export default function ReportsScreen({ vehicles = [], selectedVehicle = null })
   };
 
   // Bulk download all vehicle reports in PDF
-  const handleDownloadAllReports = () => {
-    vehicles.forEach((v, index) => {
-      setTimeout(() => {
+  const handleDownloadAllReports = async () => {
+    try {
+      setDownloadSuccessMsg(`Preparing ${vehicles.length} Vehicle Health Report PDFs...`);
+      for (let index = 0; index < vehicles.length; index++) {
+        const v = vehicles[index];
         const reportData = getVehicleHealthReportData(v);
-        generateVehicleHealthReportPdf(reportData);
-      }, index * 400);
-    });
-    setDownloadSuccessMsg(`Downloading ${vehicles.length} Vehicle Health Report PDFs (Year 2026)...`);
-    setTimeout(() => setDownloadSuccessMsg(null), 5000);
+        await generateVehicleHealthReportPdf(reportData);
+      }
+      setDownloadSuccessMsg(`Vehicle Health Report PDFs ready!`);
+      setTimeout(() => setDownloadSuccessMsg(null), 5000);
+    } catch (err) {
+      console.error("Bulk download failed:", err);
+    }
   };
 
   const getStatusBadgeClass = (statusStr) => {

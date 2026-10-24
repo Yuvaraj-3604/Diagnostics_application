@@ -247,6 +247,17 @@ export default function CanAnalyzerScreen({ initialCanId = "0CF00400", snapshot 
           {/* 8x8 Bit Layout Matrix */}
           <div className="bit-matrix-wrapper">
             <table className="bit-matrix-table">
+              <colgroup>
+                <col className="col-byte-num" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+                <col className="col-bit" />
+              </colgroup>
               <thead>
                 <tr>
                   <th className="byte-corner-th">Byte #</th>
@@ -263,7 +274,11 @@ export default function CanAnalyzerScreen({ initialCanId = "0CF00400", snapshot 
               <tbody>
                 {[0, 1, 2, 3, 4, 5, 6, 7].map(byteIdx => (
                   <tr key={byteIdx}>
-                    <td className="byte-label-td">Byte {byteIdx}</td>
+                    <td className="byte-label-td">
+                      <span className="byte-full-label">Byte </span>
+                      <span className="byte-short-label">B</span>
+                      {byteIdx}
+                    </td>
                     {[7, 6, 5, 4, 3, 2, 1, 0].map(bitIdx => {
                       const isOccupied = isBitOccupied(
                         byteIdx,

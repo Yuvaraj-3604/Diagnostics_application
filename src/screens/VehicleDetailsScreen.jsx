@@ -99,10 +99,10 @@ export default function VehicleDetailsScreen({
     setTimeout(() => setSaveSuccess(false), 3500);
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     try {
       const rep = getVehicleHealthReportData(vehicle);
-      generateVehicleHealthReportPdf(rep);
+      await generateVehicleHealthReportPdf(rep);
       setDownloadMsg(`Diagnostic Health Report PDF for ${vehicle.vehicleNo} downloaded!`);
       setTimeout(() => setDownloadMsg(null), 4000);
     } catch (e) {
@@ -541,7 +541,7 @@ export default function VehicleDetailsScreen({
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="form-row edit-modal-row">
                 <div className="form-group">
                   <label>Assigned Driver</label>
                   <input
@@ -563,7 +563,7 @@ export default function VehicleDetailsScreen({
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="form-row edit-modal-row">
                 <div className="form-group">
                   <label>Operational Status</label>
                   <select
@@ -585,13 +585,6 @@ export default function VehicleDetailsScreen({
                         return { ...prev, status: newStatus, engineStatus: eng, batteryStatus: batt };
                       });
                     }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
-                    }}
                   >
                     <option value="Healthy">Healthy</option>
                     <option value="Need Attention">Need Attention</option>
@@ -612,7 +605,7 @@ export default function VehicleDetailsScreen({
               </div>
 
               {/* Engine Status & Battery Status (Request 2) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="form-row edit-modal-row">
                 <div className="form-group">
                   <label>Engine Status</label>
                   <select
@@ -624,13 +617,6 @@ export default function VehicleDetailsScreen({
                         if (newEng !== "Normal" && st === "Healthy") st = "Need Attention";
                         return { ...prev, engineStatus: newEng, status: st };
                       });
-                    }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
                     }}
                   >
                     <option value="Normal">Normal</option>
@@ -651,13 +637,6 @@ export default function VehicleDetailsScreen({
                         if (newBatt !== "Good" && st === "Healthy") st = "Need Attention";
                         return { ...prev, batteryStatus: newBatt, status: st };
                       });
-                    }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
                     }}
                   >
                     <option value="Good">Good</option>

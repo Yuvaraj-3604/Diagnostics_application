@@ -2033,18 +2033,29 @@ body {
   box-shadow: 0 0 0 3px rgba(229, 37, 42, 0.12);
 }
 
-.form-row {
+.form-row,
+.edit-modal-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
-.modal-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.modal-actions,
+.modal-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.modal-actions button,
+.modal-actions-row button {
+  width: 100%;
+  height: 42px;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13.5px;
 }
 
 /* ==========================================================================
@@ -7310,21 +7321,27 @@ body {
   /* Vector CANoe Grid & Tables */
   .canoe-grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .canoe-left-panel,
   .canoe-right-panel {
     width: 100% !important;
+    max-width: 100% !important;
     min-width: 0 !important;
+    overflow: hidden !important;
     box-sizing: border-box !important;
   }
 
   .table-scroll {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
@@ -7357,10 +7374,11 @@ body {
   .bit-matrix-wrapper {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
-    padding: 10px 4px !important;
+    padding: 8px 2px !important;
   }
 
   .bit-matrix-table {
@@ -7372,29 +7390,43 @@ body {
     box-sizing: border-box !important;
   }
 
+  .bit-matrix-table col.col-byte-num {
+    width: 44px !important;
+  }
+
+  .bit-matrix-table col.col-bit {
+    width: calc((100% - 44px) / 8) !important;
+  }
+
   .bit-matrix-table .byte-corner-th,
   .bit-matrix-table .byte-label-td {
-    width: 48px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    padding: 6px 3px !important;
-    font-size: 10px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    padding: 6px 1px !important;
+    font-size: 9.5px !important;
     white-space: nowrap !important;
-    text-align: left !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .byte-short-label {
+    display: none;
   }
 
   .bit-matrix-table th:not(.byte-corner-th) {
-    padding: 6px 1px !important;
+    padding: 6px 0 !important;
     font-size: 10px !important;
     text-align: center !important;
     color: #64748b !important;
+    box-sizing: border-box !important;
   }
 
   .matrix-bit-cell {
     width: auto !important;
     min-width: 0 !important;
     height: 30px !important;
-    padding: 3px 1px !important;
+    padding: 2px 0 !important;
     font-size: 11px !important;
     text-align: center !important;
     vertical-align: middle !important;
