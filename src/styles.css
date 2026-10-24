@@ -1516,8 +1516,9 @@ select {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  padding: 18px 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--panel-border);
 }
 
@@ -1536,7 +1537,8 @@ select {
 .playground-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .stat-pill {
@@ -3524,7 +3526,7 @@ select {
 
 .profile-details-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 8px;
   margin-bottom: 14px;
 }

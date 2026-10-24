@@ -7410,8 +7410,13 @@ body {
     box-sizing: border-box !important;
   }
 
+  .byte-full-label {
+    display: none !important;
+  }
+
   .byte-short-label {
-    display: none;
+    display: inline !important;
+    font-weight: 700 !important;
   }
 
   .bit-matrix-table th:not(.byte-corner-th) {
@@ -7546,6 +7551,72 @@ body {
     flex-shrink: 0 !important;
     padding: 8px 12px !important;
     font-size: 12.5px !important;
+  }
+
+  /* -------------------------------------------------------------
+     Modals: Add Vehicle, Edit Vehicle, Note Dialog Responsive Engine
+     ------------------------------------------------------------- */
+  .edit-modal-row,
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .hl-modal-backdrop {
+    padding: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .hl-modal-dialog {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-form {
+    padding: 16px 14px !important;
+    gap: 12px !important;
+  }
+
+  .modal-actions,
+  .modal-actions-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+  }
+
+  .modal-actions button,
+  .modal-actions-row button {
+    height: 42px !important;
+    font-size: 13px !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Topbar Popover Dropdowns on Mobile Viewports */
+  .hl-notify-wrapper .hl-dropdown-menu,
+  .hl-user-profile-wrapper .hl-dropdown-menu {
+    max-width: calc(100vw - 20px) !important;
+    right: -6px !important;
+  }
+
+  /* Details Header Action Buttons */
+  @media (max-width: 480px) {
+    .details-header-action-btns {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 6px !important;
+    }
+    .details-header-action-btns button,
+    .details-header-action-btns .hl-btn-outline-edit,
+    .details-header-action-btns .hl-btn-secondary,
+    .details-header-action-btns .hl-btn-primary {
+      padding: 7px 4px !important;
+      font-size: 11px !important;
+      gap: 4px !important;
+    }
   }
 
   /* -------------------------------------------------------------

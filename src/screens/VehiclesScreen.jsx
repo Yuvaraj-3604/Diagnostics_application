@@ -427,7 +427,7 @@ export default function VehiclesScreen({
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="edit-modal-row">
                 <div className="form-group">
                   <label>Assigned Driver</label>
                   <input
@@ -447,7 +447,7 @@ export default function VehiclesScreen({
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="edit-modal-row">
                 <div className="form-group">
                   <label>Operational Status</label>
                   <select
@@ -469,13 +469,6 @@ export default function VehiclesScreen({
                         return { ...prev, status: newStatus, engineStatus: eng, batteryStatus: batt };
                       });
                     }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
-                    }}
                   >
                     <option value="Healthy">Healthy</option>
                     <option value="Need Attention">Need Attention</option>
@@ -496,7 +489,7 @@ export default function VehiclesScreen({
               </div>
 
               {/* Engine Status & Battery Status (Request 2) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div className="edit-modal-row">
                 <div className="form-group">
                   <label>Engine Status</label>
                   <select
@@ -508,13 +501,6 @@ export default function VehiclesScreen({
                         if (newEng !== "Normal" && st === "Healthy") st = "Need Attention";
                         return { ...prev, engineStatus: newEng, status: st };
                       });
-                    }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
                     }}
                   >
                     <option value="Normal">Normal</option>
@@ -535,13 +521,6 @@ export default function VehiclesScreen({
                         if (newBatt !== "Good" && st === "Healthy") st = "Need Attention";
                         return { ...prev, batteryStatus: newBatt, status: st };
                       });
-                    }}
-                    style={{
-                      height: "40px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--hl-card-border)",
-                      padding: "0 12px",
-                      fontSize: "13.5px"
                     }}
                   >
                     <option value="Good">Good</option>
