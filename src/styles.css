@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
   font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0f172a;
@@ -599,7 +610,10 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   gap: 9px;
   max-width: 1750px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Welcome & Status Banner */
@@ -644,7 +658,9 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   letter-spacing: -0.3px;
   margin: 0;
   font-weight: 800;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
   color: #0f172a;
 }
 
@@ -652,7 +668,9 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   font-size: 10.5px;
   color: var(--muted);
   margin: 0;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .device-quick-badge {
@@ -832,6 +850,10 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   border-radius: 9px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section-title {
@@ -841,6 +863,14 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   gap: 10px;
   padding: 6px 12px 5px;
   border-bottom: 1px solid #f1f5f9;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.section-title > div {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .section-title h2 {
@@ -848,12 +878,18 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   font-weight: 800;
   margin: 0;
   color: #0f172a;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .section-title p {
   font-size: 9.5px;
   color: var(--muted);
   margin: 1px 0 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Grids */
@@ -871,7 +907,7 @@ button:focus-visible, input:focus-visible, select:focus-visible {
 }
 
 .canoe-grid {
-  grid-template-columns: minmax(0, 1.4fr) minmax(340px, 1fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
 }
 
 /* Pipeline Flow */
@@ -2687,6 +2723,11 @@ select {
   .page-content {
     padding: 10px 10px 14px;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   /* Compact 2x2 Metric Cards Grid */
@@ -2798,6 +2839,10 @@ select {
   .canoe-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .id-analyzer-bar {
