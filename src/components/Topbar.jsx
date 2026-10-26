@@ -5,6 +5,41 @@ import {
 } from "lucide-react";
 import hauloopLogo from "../assets/hauloop-logo.png";
 
+// Curated harmonious avatar palette
+export const AVATAR_COLORS = [
+  "#e5252a", // Crimson
+  "#4f46e5", // Indigo
+  "#0d9488", // Teal
+  "#d97706", // Amber
+  "#7c3aed", // Violet
+  "#0284c7", // Sky blue
+  "#16a34a", // Emerald
+  "#db2777"  // Rose pink
+];
+
+// Helper to derive initials from user name
+export function getInitials(name) {
+  if (!name || typeof name !== "string") return "U";
+  const clean = name.trim();
+  if (!clean) return "U";
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return clean.slice(0, Math.min(2, clean.length)).toUpperCase();
+}
+
+// Deterministic color assignment based on name
+export function getAvatarColor(name) {
+  if (!name || typeof name !== "string") return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[index];
+}
+
 export default function Topbar({
   page,
   setPage,
@@ -20,7 +55,10 @@ export default function Topbar({
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showAlertsDropdown, setShowAlertsDropdown] = useState(false);
 
-  const userName = currentUser?.fullName?.split(" ")[0] || "Yuvaraj";
+  const fullDisplayName = currentUser?.fullName || currentUser?.name || currentUser?.username || "Yuvaraj Perumal";
+  const userName = fullDisplayName.split(" ")[0];
+  const userInitials = getInitials(fullDisplayName);
+  const avatarBg = getAvatarColor(fullDisplayName);
   const userEmail = currentUser?.email || "yuvaraj@example.com";
   const unreadAlertsCount = alerts.length;
 
@@ -172,17 +210,23 @@ export default function Topbar({
           )}
         </div>
 
-        {/* User Profile Badge (Panel 2: YP circle + Yuvaraj + chevron) */}
+        {/* User Profile Badge (Dynamic Avatar based on User Name) */}
         <div className="hl-user-profile-wrapper">
           <button
+            type="button"
             className="hl-user-profile-btn"
             onClick={() => {
               setShowUserDropdown(!showUserDropdown);
               setShowAlertsDropdown(false);
             }}
+            aria-label="User profile menu"
           >
-            <div className="hl-avatar-circle">
-              <span>YP</span>
+            <div
+              className="hl-avatar-circle"
+              style={{ backgroundColor: avatarBg }}
+              title={fullDisplayName}
+            >
+              <span>{userInitials}</span>
             </div>
             <span className="hl-user-name">{userName}</span>
             <ChevronDown size={15} className="hl-chevron-icon" />
@@ -192,9 +236,23 @@ export default function Topbar({
           {showUserDropdown && (
             <div className="hl-dropdown-menu user-dropdown">
               <div className="user-dropdown-header">
-                <strong className="user-name-bold">{currentUser?.fullName || "Yuvaraj Perumal"}</strong>
-                <span className="user-email-text">{userEmail}</span>
-                <span className="user-role-badge">Fleet Administrator</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                  <div
+                    className="hl-avatar-circle"
+                    style={{ backgroundColor: avatarBg, width: "36px", height: "36px", fontSize: "13px", flexShrink: 0 }}
+                  >
+                    <span>{userInitials}</span>
+                  </div>
+                  <div style={{ minWidth: 0, overflow: "hidden" }}>
+                    <strong className="user-name-bold" style={{ display: "block", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                      {fullDisplayName}
+                    </strong>
+                    <span className="user-email-text" style={{ display: "block", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                      {userEmail}
+                    </span>
+                  </div>
+                </div>
+                <span className="user-role-badge">{currentUser?.role || "Fleet Administrator"}</span>
               </div>
               <div className="dropdown-items-group">
                 <button

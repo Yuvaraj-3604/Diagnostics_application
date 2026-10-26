@@ -3,6 +3,7 @@ import {
   User, Bell, Shield, Sliders, CheckCircle2, Save, Camera, Mail, Phone, Lock
 } from "lucide-react";
 import { saveToUserDatabase } from "../lib/userDatabase.js";
+import { getInitials, getAvatarColor } from "../components/Topbar.jsx";
 
 export default function SettingsScreen({ currentUser, onUpdateUser }) {
   const [activeTab, setActiveTab] = useState("profile");
@@ -84,8 +85,12 @@ export default function SettingsScreen({ currentUser, onUpdateUser }) {
             <div className="hl-card settings-card">
               {/* Profile Avatar Card Header */}
               <div className="profile-identity-strip">
-                <div className="profile-avatar-circle">
-                  <span>YP</span>
+                <div
+                  className="profile-avatar-circle"
+                  style={{ backgroundColor: getAvatarColor(name) }}
+                  title={name}
+                >
+                  <span>{getInitials(name)}</span>
                 </div>
                 <div className="profile-identity-text">
                   <h3 className="profile-name-title">{name}</h3>
